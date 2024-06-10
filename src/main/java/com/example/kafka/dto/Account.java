@@ -7,13 +7,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class Account {
     private Long id;
-    private double balance;
+    private BigDecimal balance;
 
     @ManyToOne
     @JoinColumn(name = "personId", nullable = false)
