@@ -12,7 +12,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic balanceChangesTopic() {
         return TopicBuilder.name("change-balance")
-                //.partitions(3)
+//                .partitions(2)
                 .config(TopicConfig.RETENTION_MS_CONFIG, "600000")
                 .build();
     }

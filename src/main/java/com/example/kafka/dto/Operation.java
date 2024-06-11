@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @ToString
-public class InputArrayItem {
+public class Operation {
     private OperType operType;
     private BigDecimal amount;
 }

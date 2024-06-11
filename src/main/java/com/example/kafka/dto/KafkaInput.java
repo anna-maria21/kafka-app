@@ -11,5 +11,5 @@ import java.util.LinkedList;
 @ToString
 public class KafkaInput {
     private Long accId;
-    private LinkedList<InputArrayItem> operations;
+    private LinkedList<Operation> operations;
 }
