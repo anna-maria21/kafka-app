@@ -1,5 +1,6 @@
 package com.example.kafka.kafka;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ThrowErrorConsumer {
 
+//    @Transactional
     @KafkaListener(topics = "dialog", groupId = "myConsGroup")
     public void consume(String message) {
 

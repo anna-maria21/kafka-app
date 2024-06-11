@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.util.HashSet;
-
 @RestController
 @RequestMapping("api/kafka")
 @AllArgsConstructor
@@ -41,6 +38,5 @@ public class JsonBalanceController {
         changeBalanceProducer.send(input);
         return ResponseEntity.ok("JSON input sent to the topic");
     }
-
 
 }
