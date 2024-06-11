@@ -2,6 +2,7 @@ package com.example.kafka.kafka;
 
 import com.example.kafka.dto.Account;
 import com.example.kafka.dto.KafkaInput;
+import com.example.kafka.dto.OperType;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,4 +28,5 @@ public class JsonChangeBalanceProducer {
 
         kafkaTemplate.send(input);
     }
+
 }

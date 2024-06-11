@@ -1,21 +1,39 @@
 package com.example.kafka.controller;
 
+import com.example.kafka.dto.Account;
 import com.example.kafka.dto.KafkaInput;
+import com.example.kafka.dto.Person;
 import com.example.kafka.kafka.JsonChangeBalanceProducer;
+import com.example.kafka.repository.AccountRepo;
+import com.example.kafka.repository.PersonRepo;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import java.math.BigDecimal;
+import java.util.HashSet;
+
+@RestController
 @RequestMapping("api/kafka")
+@AllArgsConstructor
 public class JsonBalanceController {
 
-    private JsonChangeBalanceProducer changeBalanceProducer;
+    private final JsonChangeBalanceProducer changeBalanceProducer;
+    private final AccountRepo accountRepo;
+    private final PersonRepo personRepo;
 
-    public JsonBalanceController(JsonChangeBalanceProducer changeBalanceProducer) {
-        this.changeBalanceProducer = changeBalanceProducer;
+
+    @PostMapping("/new/acc")
+    public Account newAccount(@RequestBody Account account) {
+        return accountRepo.save(account);
+    }
+
+    @PostMapping("/new/person")
+    public Person newPerson(@RequestBody Person person) {
+        return personRepo.save(person);
     }
 
     @PostMapping("/change-balance")
@@ -23,5 +41,6 @@ public class JsonBalanceController {
         changeBalanceProducer.send(input);
         return ResponseEntity.ok("JSON input sent to the topic");
     }
+
 
 }

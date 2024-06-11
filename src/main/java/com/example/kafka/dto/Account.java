@@ -1,10 +1,7 @@
 package com.example.kafka.dto;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -13,6 +10,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
+@Table(name = "account")
+@ToString
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +19,6 @@ public class Account {
     private BigDecimal balance;
 
     @ManyToOne
-    @JoinColumn(name = "personId", nullable = false)
+    @JoinColumn(name = "personId")
     private Person person;
-
-
 }

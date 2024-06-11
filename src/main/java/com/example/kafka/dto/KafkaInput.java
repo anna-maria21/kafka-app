@@ -1,9 +1,6 @@
 package com.example.kafka.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.LinkedList;
 
@@ -11,6 +8,7 @@ import java.util.LinkedList;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class KafkaInput {
     private Long accId;
     private LinkedList<InputArrayItem> operations;

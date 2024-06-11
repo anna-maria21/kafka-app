@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ChangeBalanceConsumer {
 
-    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
-    public void consume(String message) {
-        log.info("Message received: {}", message);
-    }
+//    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
+//    public void consume(String message) {
+//        log.info("Message received: {}", message);
+//    }
 }

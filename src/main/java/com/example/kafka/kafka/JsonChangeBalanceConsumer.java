@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 
 @Service
 @Slf4j
@@ -18,21 +20,29 @@ import org.springframework.stereotype.Service;
 public class JsonChangeBalanceConsumer {
 
     private final AccountRepo accountRepo;
+    private final ThrowErrorProducer throwErrorProducer;
 
-    @KafkaListener(topics = "change-balance", groupId = "MyConsGroup")
+    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
     public void consume(KafkaInput input) {
 
-        log.info("Consumed: {}", input);
+        log.info("Topic: \"change-balance\". Consumed: {}", input);
         Account account = accountRepo.findById(input.getAccId())
                 .orElseThrow(() -> new NoSuchAccountException(input.getAccId()));
 
+        accountRepo.delete(account);
         for (InputArrayItem operation : input.getOperations()) {
             if (operation.getOperType() == OperType.REFUND) {
                 account.setBalance(account.getBalance().add(operation.getAmount()));
             }
             else if (operation.getOperType() == OperType.WITHDRAWAL) {
-                account.setBalance(account.getBalance().subtract(operation.getAmount()));
+                BigDecimal newBalance = account.getBalance().subtract(operation.getAmount());
+                if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+                    throwErrorProducer.send("There are not enough funds in the account. Current balance: " + account.getBalance());
+                } else {
+                    account.setBalance(newBalance);
+                }
             }
+            accountRepo.save(account);
             log.info("Operation proceed. Account balance: {}", account.getBalance());
         }
 
