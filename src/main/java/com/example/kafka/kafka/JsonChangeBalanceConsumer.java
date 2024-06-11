@@ -21,6 +21,7 @@ public class JsonChangeBalanceConsumer {
 
     private final AccountRepo accountRepo;
     private final ThrowErrorProducer throwErrorProducer;
+//    private KafkaTemplate<Long, String> kafkaTemplate;
 
     @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
     public void consume(ConsumerRecord<Long, Operation> input) {
@@ -35,17 +36,25 @@ public class JsonChangeBalanceConsumer {
         Operation operation = input.value();
 
         log.info("Operation: {}: {}", operation.getOperType(), operation.getAmount());
+
+
         if (operation.getOperType() == OperType.REFUND) {
             account.setBalance(account.getBalance().add(operation.getAmount()));
         } else if (operation.getOperType() == OperType.WITHDRAWAL) {
             BigDecimal newBalance = account.getBalance().subtract(operation.getAmount());
             if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
                 throwErrorProducer.send(input.key(), /*"Operation: " + operation.getOperType() + " Sum: " + operation.getAmount() + */" There are not enough funds in the account. Current balance: " + account.getBalance());
+//                kafkaTemplate.send("dialog", input.key(), "There are not enough funds in the account. Current balance: " + account.getBalance());
+//                while (!ThrowErrorConsumer.messageReceived) {
+//                    wait();
+//                }
+//                ThrowErrorConsumer.messageReceived = false;
             } else {
                 account.setBalance(newBalance);
             }
         }
         accountRepo.save(account);
+
         log.info("Operation proceed. Account balance: {}", account.getBalance());
 
     }

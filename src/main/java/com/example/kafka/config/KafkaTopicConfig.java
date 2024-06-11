@@ -20,7 +20,7 @@ public class KafkaTopicConfig {
     public NewTopic dlgTopic() {
         return TopicBuilder.name("dialog")
                 .config(TopicConfig.RETENTION_MS_CONFIG, "6000")
-                //.partitions(3)
+                .partitions(3)
                 .build();
     }
 }
