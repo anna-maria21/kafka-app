@@ -11,8 +11,13 @@ public class JsonBalanceControllerAdvice {
     @ExceptionHandler(NoSuchAccountException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleJsonParseException(NoSuchAccountException ex) {
-        String errorMessage = "Invalid JSON format: " + ex.getMessage();
-        return new ApiError(errorMessage);
+        return new ApiError(ex.getMessage());
+    }
+
+    @ExceptionHandler(NoSuchPersonException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleJsonParseException(NoSuchPersonException ex) {
+        return new ApiError(ex.getMessage());
     }
 
 }
