@@ -1,4 +1,4 @@
-package com.example.kafka.dto;
+package com.example.kafka.entity;
 
 
 import jakarta.persistence.*;
