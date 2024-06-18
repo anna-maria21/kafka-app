@@ -14,7 +14,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic balanceChangesTopic() {
         return TopicBuilder.name("change-balance")
-                .partitions(3)
+                .partitions(5)
                 .config(TopicConfig.RETENTION_MS_CONFIG, "600000")
                 .build();
     }
@@ -23,7 +23,7 @@ public class KafkaTopicConfig {
     public NewTopic dlgTopic() {
         return TopicBuilder.name("dialog")
                 .config(TopicConfig.RETENTION_MS_CONFIG, "60000")
-                .partitions(3)
+                .partitions(5)
                 .build();
     }
 

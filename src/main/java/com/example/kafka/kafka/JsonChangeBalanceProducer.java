@@ -19,11 +19,6 @@ public class JsonChangeBalanceProducer {
     public void send(LinkedList<OperationDto> operations) {
         log.info("Sending message to change balance to the topic ...");
 
-//        Message<KafkaInput> input = MessageBuilder
-//                .withPayload(kafkaInput)
-//                .setHeader(KafkaHeaders.TOPIC, "change-balance")
-//                .build();
-
         for (OperationDto operationDto : operations) {
             kafkaTemplate.send("change-balance", operationDto.accId(), operationDto);
         }
