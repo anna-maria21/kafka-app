@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-person
+      author: Hanna
+      changes:
+        - createTable:
+            tableName: operation
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: operation_type
+                  type: integer
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: amount
+                  type: numeric(20, 3)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: account_id
+                  type: bigint
+                  constraints:
+                    nullable: false

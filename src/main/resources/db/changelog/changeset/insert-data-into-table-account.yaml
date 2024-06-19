@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-account
+      author: Hanna
+      changes:
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  value: 500.65
+              - column:
+                  name: person_id
+                  value: 1
+
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  value: 3266.50
+              - column:
+                  name: person_id
+                  value: 1
+
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  value: 5000.65
+              - column:
+                  name: person_id
+                  value: 2
+
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  value: 50.65
+              - column:
+                  name: person_id
+                  value: 3
+
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  value: 500000.65
+              - column:
+                  name: person_id
+                  value: 3
+
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: balance
+                  value: 798.5
+              - column:
+                  name: person_id
+                  value: 4

@@ -22,6 +22,6 @@ public class Operation {
     private BigDecimal amount;
 
     @ManyToOne
-    @JoinColumn(name = "accId")
+    @JoinColumn(name = "account_id")
     private Account account;
 }

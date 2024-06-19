@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-account-foreign-key
+      author: Hanna
+      changes:
+        - addForeignKeyConstraint:
+            constraintName: fk_person_account
+            baseTableName: account
+            baseColumnNames: person_id
+            referencedTableName: person
+            referencedColumnNames: id

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-operation-foreign-key
+      author: Hanna
+      changes:
+        - addForeignKeyConstraint:
+            constraintName: fk_operation-account
+            baseTableName: operation
+            baseColumnNames: account_id
+            referencedTableName: account
+            referencedColumnNames: id

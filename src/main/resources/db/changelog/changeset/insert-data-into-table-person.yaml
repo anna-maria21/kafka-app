@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-account
+      author: Hanna
+      changes:
+        - insert:
+            tableName: person
+            columns:
+              - column:
+                  name: first_name
+                  value: "first1name"
+              - column:
+                  name: last_name
+                  value: "last1name"
+
+        - insert:
+            tableName: person
+            columns:
+              - column:
+                  name: first_name
+                  value: "first2name"
+              - column:
+                  name: last_name
+                  value: "last2name"
+
+        - insert:
+            tableName: person
+            columns:
+              - column:
+                  name: first_name
+                  value: "first3name"
+              - column:
+                  name: last_name
+                  value: "last3name"
+
+        - insert:
+            tableName: person
+            columns:
+              - column:
+                  name: first_name
+                  value: "first4name"
+              - column:
+                  name: last_name
+                  value: "last4name"
