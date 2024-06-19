@@ -15,13 +15,9 @@ public class JsonChangeBalanceProducer {
 
     private KafkaTemplate<Long, OperationDto> kafkaTemplate;
 
-
     public void send(LinkedList<OperationDto> operations) {
         log.info("Sending message to change balance to the topic ...");
-
-        for (OperationDto operationDto : operations) {
-            kafkaTemplate.send("change-balance", operationDto.accId(), operationDto);
-        }
+        operations.forEach(operationDto -> kafkaTemplate.send("change-balance", operationDto.accId(), operationDto));
     }
 
 }
