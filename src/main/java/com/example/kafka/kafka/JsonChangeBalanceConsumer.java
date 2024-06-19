@@ -28,32 +28,32 @@ public class JsonChangeBalanceConsumer {
     private final Mapper mapper;
 
 //    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
-//    public void consume(ConsumerRecord<Long, OperationDto> input) {
-//
-//        log.info("Topic: \"change-balance\". Consumed: {}", input);
-//
-//        Account account = accountRepo.findById(input.key())
-//                .orElseThrow(() -> new NoSuchAccountException(input.key()));
-//        log.info("Account {} balance: {}", input.key(), account.getBalance());
-//
-//        OperationDto operationDto = input.value();
-//        Operation operation = mapper.toOperation(operationDto);
-//        operation = operationRepo.save(operation);
-//        log.info("Operation {}: {}: {}", operation.getId(), operation.getOperType(), operation.getAmount());
-//
-//        if (operation.getOperType() == OperType.REFUND) {
-//            account.setBalance(account.getBalance().add(operation.getAmount()));
-//        } else if (operation.getOperType() == OperType.WITHDRAWAL) {
-//            BigDecimal newBalance = account.getBalance().subtract(operation.getAmount());
-//            if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-//                throwErrorProducer.send(input.key(), "Operation: " + operation.getId() +
-//                        " There are not enough funds in the account.");
-//            } else {
-//                account.setBalance(newBalance);
-//            }
-//        }
-//
-//        accountRepo.save(account);
-//        log.info("Operation proceed. Account balance: {}", account.getBalance());
-//    }
+    public void consume(ConsumerRecord<Long, OperationDto> input) {
+
+        log.info("Topic: \"change-balance\". Consumed: {}", input);
+
+        Account account = accountRepo.findById(input.key())
+                .orElseThrow(() -> new NoSuchAccountException(input.key()));
+        log.info("Account {} balance: {}", input.key(), account.getBalance());
+
+        OperationDto operationDto = input.value();
+        Operation operation = mapper.toOperation(operationDto);
+        operation = operationRepo.save(operation);
+        log.info("Operation {}: {}: {}", operation.getId(), operation.getOperType(), operation.getAmount());
+
+        if (operation.getOperType() == OperType.REFUND) {
+            account.setBalance(account.getBalance().add(operation.getAmount()));
+        } else if (operation.getOperType() == OperType.WITHDRAWAL) {
+            BigDecimal newBalance = account.getBalance().subtract(operation.getAmount());
+            if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+                throwErrorProducer.send(input.key(), "Operation: " + operation.getId() +
+                        " There are not enough funds in the account.");
+            } else {
+                account.setBalance(newBalance);
+            }
+        }
+
+        accountRepo.save(account);
+        log.info("Operation proceed. Account balance: {}", account.getBalance());
+    }
 }

@@ -35,16 +35,15 @@ public class OperationTopology {
 
         KStream<Long, Operation> operStream = builder
                 .stream("change-balance", Consumed.with(Serdes.Long(), new JsonSerde<>(OperationDto.class)))
-                .peek((key, value) -> log.info("Consumed from topic \"change-balance\": key - {}, value - {}", key, value))
-                .mapValues(value -> operationRepo.save(mapper.toOperation(value)));
+                .mapValues(value -> operationRepo.save(mapper.toOperation(value)))
+                .peek((key, value) -> log.info("Consumed from topic \"change-balance\": key - {}, value - {}", key, value));
 
         KStream<Long, Operation> refundOperations = operStream
                 .filter((key, value) -> value.getOperType() == OperType.REFUND)
                 .peek((key, value) -> {
                     Account account = value.getAccount();
-                    account.setBalance(account.getBalance().add(value.getAmount()));
-                    accountRepo.save(account);
-                    log.info("Operation {}: {} {}. Account balance: {}", value.getId(), value.getOperType(), value.getAmount(), account.getBalance());
+                    BigDecimal newBalance = account.getBalance().add(value.getAmount());
+                    setNewBalanceToAccount(account, value, newBalance);
                 });
 
         KStream<Long, BigDecimal> withdrawalOperations = operStream
@@ -60,11 +59,9 @@ public class OperationTopology {
                 .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new NoSuchAccountException(1L)))
                 .selectKey((key, value) -> value.getAccount().getId())
                 .peek((key, value) -> {
-                    Account account = accountRepo.findById(value.getAccount().getId()).orElseThrow(()
-                            -> new NoSuchAccountException(value.getAccount().getId()));
-                    account.setBalance(account.getBalance().subtract(value.getAmount()));
-                    accountRepo.save(account);
-                    log.info("Operation {}: {} {}. Account balance: {}", value.getId(), value.getOperType(), value.getAmount(), account.getBalance());
+                    Account account = value.getAccount();
+                    BigDecimal newBalance = account.getBalance().subtract(value.getAmount());
+                    setNewBalanceToAccount(account, value, newBalance);
                 });
 
         KStream<Long, String> withdrawalOperationsFail = withdrawalOperations
@@ -74,5 +71,11 @@ public class OperationTopology {
                 .mapValues(value -> "Operation: " + value.getId() + ": " + value.getOperType() + ". There are not enough funds in the account.");
 
         withdrawalOperationsFail.to("dialog", Produced.with(Serdes.Long(), Serdes.String()));
+    }
+
+    private void setNewBalanceToAccount(Account account, Operation operation, BigDecimal newBalance) {
+        account.setBalance(newBalance);
+        accountRepo.save(account);
+        log.info("Operation {}: {} {}. Account balance: {}", operation.getId(), operation.getOperType(), operation.getAmount(), account.getBalance());
     }
 }
