@@ -14,6 +14,6 @@ public class ThrowErrorProducer {
 
     public void send(Long accId, String message) {
         log.info("Sending message to the error topic ...");
-        kafkaTemplate.send("dialog", accId, message);
+        kafkaTemplate.send("dlg-failed", accId, message);
     }
 }

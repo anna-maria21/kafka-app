@@ -25,17 +25,17 @@ public class KafkaTopicConfig {
                 .build();
     }
 
-//    @Bean
-//    public NewTopic tempTopic() {
-//        return TopicBuilder.name("temp")
-//                .config(TopicConfig.RETENTION_MS_CONFIG, "600000")
-//                .partitions(5)
-//                .build();
-//    }
+    @Bean
+    public NewTopic tempTopic() {
+        return TopicBuilder.name("dlg-succeed")
+                .config(TopicConfig.RETENTION_MS_CONFIG, "600000")
+                .partitions(5)
+                .build();
+    }
 
     @Bean
     public NewTopic dlgTopic() {
-        return TopicBuilder.name("dialog")
+        return TopicBuilder.name("dlg-failed")
                 .config(TopicConfig.RETENTION_MS_CONFIG, "60000")
                 .partitions(5)
                 .build();

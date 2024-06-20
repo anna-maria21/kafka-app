@@ -1,5 +1,6 @@
 package com.example.kafka.kafka;
 
+import com.example.kafka.entity.Operation;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,10 +14,10 @@ import org.springframework.stereotype.Service;
 @Setter
 public class ThrowErrorConsumer {
 
-    @KafkaListener(topics = "dialog", groupId = "myConsGroup")
-    public void consume(ConsumerRecord<Long, String> record) {
+    @KafkaListener(topics = "dlg-failed", groupId = "myConsGroup")
+    public void consume(ConsumerRecord<Long, Operation> record) {
 
-        log.info("Topic: \"dialog\". Consumed new ERROR MESSAGE");
-        log.error("Account {}. {}", record.key(), record.value());
+        log.info("Topic: \"dlg-failed\". Consumed new ERROR MESSAGE");
+        log.error("Operation: {}: {}. There are not enough funds in the account.", record.value().getId(), record.value().getOperationType());
     }
 }

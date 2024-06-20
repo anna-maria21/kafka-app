@@ -33,13 +33,13 @@ public class OperationTopology {
 
         KStream<Long, Operation> operStream = builder
                 .stream("change-balance", Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
-                .mapValues(value -> operationRepo.save(value))
+                .mapValues(operationRepo::save)
                 .peek((key, value) -> log.info("Consumed from topic \"change-balance\": account - {}, operation - {}", key, value))
                 .selectKey((key, value) -> value.getId());
 
         KStream<Long, Operation> confirmationStream = builder
                 .stream("payment-confirmation", Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
-                .peek((key, value) -> log.info("Key: {}, value: {}", key, value));
+                .peek((key, value) -> log.info("Consumed from topic \"change-balance\":  Confirmed id operation: {}", key));
 
         KStream<Long, Operation> confirmedOperations = operStream.join(confirmationStream,
                 (operation, confirmed) -> operation,
@@ -52,8 +52,9 @@ public class OperationTopology {
                 .peek((key, value) -> {
                     Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
                     BigDecimal newBalance = account.getBalance().add(value.getAmount());
-                    setNewBalanceToAccount(account, value, newBalance);
+                    setNewBalanceToAccount(account, newBalance);
                 });
+        refundOperations.to("dlg-succeed", Produced.with(Serdes.Long(), new JsonSerde<>(Operation.class)));
 
         KStream<Long, BigDecimal> withdrawalOperations = confirmedOperations
                 .filter((key, value) -> value.getOperationType() == OperType.WITHDRAWAL)
@@ -70,21 +71,20 @@ public class OperationTopology {
                 .peek((key, value) -> {
                     Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
                     BigDecimal newBalance = account.getBalance().subtract(value.getAmount());
-                    setNewBalanceToAccount(account, value, newBalance);
+                    setNewBalanceToAccount(account, newBalance);
                 });
+        withdrawalOperationsSuccess.to("dlg-succeed", Produced.with(Serdes.Long(), new JsonSerde<>(Operation.class)));
 
-        KStream<Long, String> withdrawalOperationsFail = withdrawalOperations
+        KStream<Long, Operation> withdrawalOperationsFail = withdrawalOperations
                 .filter((key, value) -> value.compareTo(BigDecimal.ZERO) < 0)
                 .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new NoSuchAccountException(1L)))
-                .selectKey((key, value) -> value.getAccountId())
-                .mapValues(value -> "Operation: " + value.getId() + ": " + value.getOperationType() + ". There are not enough funds in the account.");
+                .selectKey((key, value) -> value.getAccountId());
 
-        withdrawalOperationsFail.to("dialog", Produced.with(Serdes.Long(), Serdes.String()));
+        withdrawalOperationsFail.to("dlg-failed", Produced.with(Serdes.Long(), new JsonSerde<>(Operation.class)));
     }
 
-    private void setNewBalanceToAccount(Account account, Operation operation, BigDecimal newBalance) {
+    private void setNewBalanceToAccount(Account account, BigDecimal newBalance) {
         account.setBalance(newBalance);
         accountRepo.save(account);
-        log.info("Operation {}: {} {}. Account balance: {}", operation.getId(), operation.getOperationType(), operation.getAmount(), account.getBalance());
     }
 }
