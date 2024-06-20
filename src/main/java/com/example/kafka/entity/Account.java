@@ -23,6 +23,6 @@ public class Account {
     @JoinColumn(name = "personId")
     private Person person;
 
-    @OneToMany(mappedBy = "id")
+    @OneToMany(mappedBy = "id", fetch = FetchType.EAGER)
     private Set<Operation> operations;
 }

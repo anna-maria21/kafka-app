@@ -16,7 +16,7 @@ databaseChangeLog:
 
               - column:
                   name: operation_type
-                  type: integer
+                  type: varchar(15)
                   constraints:
                     nullable: false
 

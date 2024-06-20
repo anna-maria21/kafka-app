@@ -1,15 +1,15 @@
-databaseChangeLog:
-  - include:
-      file: classpath:/db/changelog/changeset/create-table-person.yaml
-  - include:
-      file: classpath:/db/changelog/changeset/create-table-account.yaml
-  - include:
-      file: classpath:/db/changelog/changeset/add-account-foreign-key.yaml
-  - include:
-      file: classpath:/db/changelog/changeset/create-table-operation.yaml
-  - include:
-      file: classpath:/db/changelog/changeset/add-operation-foreign-key.yaml
-  - include:
-      file: classpath:/db/changelog/changeset/insert-data-into-table-person.yaml
-  - include:
-      file: classpath:/db/changelog/changeset/insert-data-into-table-account.yaml
+#databaseChangeLog:
+#  - include:
+#      file: classpath:/db/changelog/changeset/create-table-person.yaml
+#  - include:
+#      file: classpath:/db/changelog/changeset/create-table-account.yaml
+#  - include:
+#      file: classpath:/db/changelog/changeset/add-account-foreign-key.yaml
+#  - include:
+#      file: classpath:/db/changelog/changeset/create-table-operation.yaml
+#  - include:
+#      file: classpath:/db/changelog/changeset/add-operation-foreign-key.yaml
+#  - include:
+#      file: classpath:/db/changelog/changeset/insert-data-into-table-person.yaml
+#  - include:
+#      file: classpath:/db/changelog/changeset/insert-data-into-table-account.yaml

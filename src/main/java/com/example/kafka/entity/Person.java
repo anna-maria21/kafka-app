@@ -12,7 +12,6 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "person")
-@ToString
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +19,6 @@ public class Person {
     private String firstName;
     private String lastName;
 
-    @OneToMany(mappedBy = "id")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "id")
     private Set<Account> accounts;
 }

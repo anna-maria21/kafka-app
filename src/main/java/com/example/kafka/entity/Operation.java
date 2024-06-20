@@ -8,20 +8,23 @@ import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
 @Entity
 @Builder
 public class Operation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long accountId;
 
-    private OperType operType;
+    private OperType operationType;
     private BigDecimal amount;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+//    @ManyToOne
+//    @JoinColumn(name = "account_id")
+//    private Account account;
+
+//    @ManyToOne
+//    @JoinColumn(name = "basket_id")
+//    private Basket basket;
 }

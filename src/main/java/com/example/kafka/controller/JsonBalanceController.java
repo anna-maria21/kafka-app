@@ -1,17 +1,13 @@
 package com.example.kafka.controller;
 
 import com.example.kafka.dto.AccountDto;
-import com.example.kafka.dto.OperationDto;
 import com.example.kafka.entity.Account;
+import com.example.kafka.entity.Operation;
 import com.example.kafka.entity.Person;
-import com.example.kafka.kafka.JsonChangeBalanceProducer;
 import com.example.kafka.service.JsonBalanceService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedList;
 
@@ -20,7 +16,6 @@ import java.util.LinkedList;
 @AllArgsConstructor
 public class JsonBalanceController {
 
-    private final JsonChangeBalanceProducer changeBalanceProducer;
     private final JsonBalanceService service;
 
 
@@ -35,9 +30,15 @@ public class JsonBalanceController {
     }
 
     @PostMapping("/change-balance")
-    public ResponseEntity<String> sendMessage(@RequestBody LinkedList<OperationDto> input) {
-        changeBalanceProducer.send(input);
+    public ResponseEntity<String> sendMessage(@RequestBody LinkedList<Operation> input) {
+        service.sendPayments(input);
         return ResponseEntity.ok("JSON input sent to the topic");
+    }
+
+    @GetMapping("/confirm/{id}")
+    public ResponseEntity<String> confirmPayment(@PathVariable Integer id) {
+        service.sendConfirmation(id);
+        return ResponseEntity.ok("Confirmation sent to the topic");
     }
 
 }

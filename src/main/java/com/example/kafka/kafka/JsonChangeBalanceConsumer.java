@@ -1,7 +1,6 @@
 package com.example.kafka.kafka;
 
 import com.example.kafka.dto.OperType;
-import com.example.kafka.dto.OperationDto;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.exception.NoSuchAccountException;
@@ -28,7 +27,7 @@ public class JsonChangeBalanceConsumer {
     private final Mapper mapper;
 
 //    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
-    public void consume(ConsumerRecord<Long, OperationDto> input) {
+    public void consume(ConsumerRecord<Long, Operation> input) {
 
         log.info("Topic: \"change-balance\". Consumed: {}", input);
 
@@ -36,14 +35,13 @@ public class JsonChangeBalanceConsumer {
                 .orElseThrow(() -> new NoSuchAccountException(input.key()));
         log.info("Account {} balance: {}", input.key(), account.getBalance());
 
-        OperationDto operationDto = input.value();
-        Operation operation = mapper.toOperation(operationDto);
+        Operation operation = input.value();
         operation = operationRepo.save(operation);
-        log.info("Operation {}: {}: {}", operation.getId(), operation.getOperType(), operation.getAmount());
+        log.info("Operation {}: {}: {}", operation.getId(), operation.getOperationType(), operation.getAmount());
 
-        if (operation.getOperType() == OperType.REFUND) {
+        if (operation.getOperationType() == OperType.REFUND) {
             account.setBalance(account.getBalance().add(operation.getAmount()));
-        } else if (operation.getOperType() == OperType.WITHDRAWAL) {
+        } else if (operation.getOperationType() == OperType.WITHDRAWAL) {
             BigDecimal newBalance = account.getBalance().subtract(operation.getAmount());
             if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
                 throwErrorProducer.send(input.key(), "Operation: " + operation.getId() +
