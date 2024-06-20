@@ -36,7 +36,7 @@ public class JsonBalanceController {
     }
 
     @GetMapping("/confirm/{id}")
-    public ResponseEntity<String> confirmPayment(@PathVariable Integer id) {
+    public ResponseEntity<String> confirmPayment(@PathVariable LinkedList<Integer> id) {
         service.sendConfirmation(id);
         return ResponseEntity.ok("Confirmation sent to the topic");
     }
