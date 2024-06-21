@@ -3,6 +3,7 @@ package com.example.kafka.service;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.entity.Person;
+import com.example.kafka.exception.AlreadyConfirmedOperationException;
 import com.example.kafka.exception.NoSuchAccountException;
 import com.example.kafka.exception.NoSuchOperationException;
 import com.example.kafka.exception.NoSuchPersonException;
@@ -43,7 +44,12 @@ public class JsonBalanceService {
     }
 
     public void sendConfirmation(LinkedList<Integer> ids) {
-        ids.forEach(id -> operationRepo.findById(Long.valueOf(id)).orElseThrow(() -> new NoSuchOperationException(Long.valueOf(id))));
+        long amountAlreadyConfirmedOperations = ids.stream()
+                .filter(id -> operationRepo.findById(Long.valueOf(id)).orElseThrow(() -> new NoSuchOperationException(Long.valueOf(id))).getIsConfirmed())
+                .count();
+        if (amountAlreadyConfirmedOperations > 0) {
+            throw new AlreadyConfirmedOperationException();
+        }
         confirmProducer.send(ids);
     }
 }

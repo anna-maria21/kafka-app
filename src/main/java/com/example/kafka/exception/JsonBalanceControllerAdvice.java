@@ -26,5 +26,11 @@ public class JsonBalanceControllerAdvice {
         return new ApiError(ex.getMessage());
     }
 
+    @ExceptionHandler(AlreadyConfirmedOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleAlreadyConfirmedOperationException(AlreadyConfirmedOperationException ex) {
+        return new ApiError(ex.getMessage());
+    }
+
 
 }

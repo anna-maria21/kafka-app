@@ -40,11 +40,17 @@ public class OperationTopology {
                 .stream("payment-confirmation", Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
                 .peek((key, value) -> log.info("Consumed from topic \"payment-confirm\":  Confirmed id operation: {}", key));
 
-        KStream<Long, Operation> confirmedOperations = operStream.join(confirmationStream,
-                (operation, confirmed) -> operation,
-                JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(10)),
-                StreamJoined.with(Serdes.Long(), new JsonSerde<>(Operation.class), new JsonSerde<>(Operation.class))
-        );
+        KStream<Long, Operation> confirmedOperations = operStream
+                .join(
+                    confirmationStream,
+                    (operation, confirmed) -> operation,
+                    JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(10)),
+                    StreamJoined.with(Serdes.Long(), new JsonSerde<>(Operation.class), new JsonSerde<>(Operation.class)))
+                .peek((key, value) -> {
+                    Operation operation = operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key));
+                    operation.setIsConfirmed(true);
+                    operationRepo.save(operation);
+                });
 
         KStream<Long, Operation> refundOperations = confirmedOperations
                 .filter((key, value) -> value.getOperationType() == OperType.REFUND)

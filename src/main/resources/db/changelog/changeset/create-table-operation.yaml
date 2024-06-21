@@ -31,3 +31,9 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     nullable: false
+
+              - column:
+                  name: is_confirmed
+                  type: boolean
+                  constraints:
+                    nullable: false

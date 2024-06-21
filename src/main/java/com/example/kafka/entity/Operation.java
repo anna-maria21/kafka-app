@@ -20,4 +20,6 @@ public class Operation {
     private OperType operationType;
     private BigDecimal amount;
 
+    private Boolean isConfirmed = false;
+
 }
