@@ -49,6 +49,7 @@ public class OperationTopology {
                 .filter((key, value) -> value.getOperationType() == OperType.REFUND)
                 .selectKey((key, value) -> value.getAccountId())
                 .peek((key, value) -> {
+
                     Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
                     BigDecimal newBalance = account.getBalance().add(value.getAmount());
                     setNewBalanceToAccount(account, newBalance);
@@ -59,8 +60,8 @@ public class OperationTopology {
                 .filter((key, value) -> value.getOperationType() == OperType.WITHDRAWAL)
                 .selectKey((key, value) -> value.getId())
                 .mapValues((key, value) -> {
-                    Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
-                    return account.getBalance().subtract(value.getAmount());
+                        Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
+                        return account.getBalance().subtract(value.getAmount());
                 });
 
         KStream<Long, Operation> withdrawalOperationsSuccess = withdrawalOperations

@@ -20,11 +20,4 @@ public class Operation {
     private OperType operationType;
     private BigDecimal amount;
 
-//    @ManyToOne
-//    @JoinColumn(name = "account_id")
-//    private Account account;
-
-//    @ManyToOne
-//    @JoinColumn(name = "basket_id")
-//    private Basket basket;
 }

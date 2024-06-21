@@ -1,6 +1,5 @@
 package com.example.kafka.controller;
 
-import com.example.kafka.dto.AccountDto;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.entity.Person;
@@ -20,8 +19,8 @@ public class JsonBalanceController {
 
 
     @PostMapping("/new/acc")
-    public Account newAccount(@RequestBody AccountDto accountDto) {
-        return service.saveNewAccount(accountDto);
+    public Account newAccount(@RequestBody Account account) {
+        return service.saveNewAccount(account);
     }
 
     @PostMapping("/new/person")

@@ -8,16 +8,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class JsonBalanceControllerAdvice {
 
-    @ExceptionHandler(NoSuchAccountException.class)
+    @ExceptionHandler(NoSuchPersonException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleJsonParseException(NoSuchAccountException ex) {
+    public ApiError handleNoSuchPersonException(NoSuchPersonException ex) {
         return new ApiError(ex.getMessage());
     }
 
-    @ExceptionHandler(NoSuchPersonException.class)
+    @ExceptionHandler(NoSuchAccountException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleJsonParseException(NoSuchPersonException ex) {
+    public ApiError handleNoSuchAccountException(NoSuchAccountException ex) {
         return new ApiError(ex.getMessage());
     }
+
+    @ExceptionHandler(NoSuchOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleNoSuchOperationException(NoSuchOperationException ex) {
+        return new ApiError(ex.getMessage());
+    }
+
 
 }

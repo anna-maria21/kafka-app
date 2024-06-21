@@ -4,7 +4,6 @@ import com.example.kafka.dto.OperType;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.exception.NoSuchAccountException;
-import com.example.kafka.mapper.Mapper;
 import com.example.kafka.repository.AccountRepo;
 import com.example.kafka.repository.OperationRepo;
 import lombok.AllArgsConstructor;
@@ -24,7 +23,6 @@ public class JsonChangeBalanceConsumer {
     private final AccountRepo accountRepo;
     private final ThrowErrorProducer throwErrorProducer;
     private final OperationRepo operationRepo;
-    private final Mapper mapper;
 
 //    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
     public void consume(ConsumerRecord<Long, Operation> input) {
