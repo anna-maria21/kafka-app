@@ -4,6 +4,7 @@ import com.example.kafka.dto.OperType;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.exception.NoSuchAccountException;
+import com.example.kafka.exception.NoSuchOperationException;
 import com.example.kafka.repository.AccountRepo;
 import com.example.kafka.repository.OperationRepo;
 import lombok.AllArgsConstructor;
@@ -66,7 +67,7 @@ public class OperationTopology {
 
         KStream<Long, Operation> withdrawalOperationsSuccess = withdrawalOperations
                 .filter((key, value) -> value.compareTo(BigDecimal.ZERO) > 0)
-                .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new RuntimeException("Operation not found")))
+                .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key)))
                 .selectKey((key, value) -> value.getAccountId())
                 .peek((key, value) -> {
                     Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
@@ -77,7 +78,7 @@ public class OperationTopology {
 
         KStream<Long, Operation> withdrawalOperationsFail = withdrawalOperations
                 .filter((key, value) -> value.compareTo(BigDecimal.ZERO) < 0)
-                .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new RuntimeException("Operation not found")))
+                .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key)))
                 .selectKey((key, value) -> value.getAccountId());
 
         withdrawalOperationsFail.to("dlg-failed", Produced.with(Serdes.Long(), new JsonSerde<>(Operation.class)));
