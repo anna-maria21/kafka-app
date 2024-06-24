@@ -4,12 +4,11 @@ import com.example.kafka.dto.OperType;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.exception.NoSuchAccountException;
-import com.example.kafka.repository.AccountRepo;
-import com.example.kafka.repository.OperationRepo;
+import com.example.kafka.repository.jpa.AccountRepo;
+import com.example.kafka.repository.jpa.OperationRepo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

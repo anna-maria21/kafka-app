@@ -1,7 +1,7 @@
 package com.example.kafka.kafka;
 
 import com.example.kafka.entity.Operation;
-import com.example.kafka.repository.OperationRepo;
+import com.example.kafka.repository.jpa.OperationRepo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
