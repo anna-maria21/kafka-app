@@ -21,10 +21,9 @@ public class SuccessPaymentsConsumer {
     @KafkaListener(topics = "dlg-succeed", groupId = "myConsGroup")
     public void consume(ConsumerRecord<Long, Operation> record) {
         Operation operation = record.value();
-        // перевірити record.key() - приходить ід операції, а не ід акаунту
-        Account account = accountRepo.findById(record.key()).orElseThrow(() -> new NoSuchAccountException(operation.getAccountId()));
+        Account account = accountRepo.findById(record.value().getAccountId()).orElseThrow(() -> new NoSuchAccountException(operation.getAccountId()));
 
         log.info("Topic: \"dlg-succeed\". Consumed new SUCCESS MESSAGE");
-        log.info("Operation {}: {} {}. Account balance: {}", operation.getId(), operation.getOperationType(), operation.getAmount(), account.getBalance());
+        log.info("Operation {}: {} {}.", operation.getId(), operation.getOperationType(), operation.getAmount());
     }
 }
