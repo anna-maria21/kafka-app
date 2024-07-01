@@ -13,7 +13,7 @@ public class KafkaTopicConfig {
     public NewTopic balanceChangesTopic() {
         return TopicBuilder.name("change-balance")
                 .partitions(5)
-                .config(TopicConfig.RETENTION_MS_CONFIG, "360000000")
+                .config(TopicConfig.RETENTION_MS_CONFIG, "600000")
                 .build();
     }
 
@@ -26,7 +26,7 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic tempTopic() {
+    public NewTopic dlgSucceedTopic() {
         return TopicBuilder.name("dlg-succeed")
                 .config(TopicConfig.RETENTION_MS_CONFIG, "600000")
                 .partitions(5)
@@ -34,10 +34,25 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic dlgTopic() {
+    public NewTopic dlgFailedTopic() {
         return TopicBuilder.name("dlg-failed")
                 .config(TopicConfig.RETENTION_MS_CONFIG, "60000")
                 .partitions(5)
+                .build();
+    }
+
+    @Bean
+    public NewTopic retry() {
+        return TopicBuilder.name("my-retry")
+                .config(TopicConfig.RETENTION_MS_CONFIG, "60000")
+                .partitions(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic dlq() {
+        return TopicBuilder.name("dlq")
+                .config(TopicConfig.RETENTION_MS_CONFIG, "60000")
                 .build();
     }
 

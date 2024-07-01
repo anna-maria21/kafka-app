@@ -14,6 +14,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +32,11 @@ public class MyStreamsProcessing {
     private final AccountRepo accountRepo;
     private final OperationRepo operationRepo;
     private final RedisTemplate<String, Object> redisTemplate;
+    private KafkaTemplate<Long, Operation> kafkaTemplate;
 
-//    @Autowired
+    @Autowired
     public void process(StreamsBuilder builder) {
+//        redisTemplate.getConnectionFactory().getConnection().flushAll();
 
         KStream<Long, Operation> operStream = builder
                 .stream("change-balance", Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
@@ -51,17 +54,17 @@ public class MyStreamsProcessing {
 
         KStream<Long, Operation> confirmedOperations = operStream
                 .join(
-                    confirmationStream,
-                    (operation, confirmed) -> {
-                        Operation redisOperation = (Operation) redisTemplate.opsForHash().get(HASH_KEY, confirmed.getId().toString());
-                        if (redisOperation != null) {
-                            redisTemplate.opsForHash().delete(HASH_KEY, confirmed.getId().toString());
-                            return redisOperation;
-                        }
-                        return operation;
-                    },
-                    JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(7)),
-                    StreamJoined.with(Serdes.Long(), new JsonSerde<>(Operation.class), new JsonSerde<>(Operation.class)))
+                        confirmationStream,
+                        (operation, confirmed) -> {
+                            Operation redisOperation = (Operation) redisTemplate.opsForHash().get(HASH_KEY, confirmed.getId().toString());
+                            if (redisOperation != null) {
+                                redisTemplate.opsForHash().delete(HASH_KEY, confirmed.getId().toString());
+                                return redisOperation;
+                            }
+                            return operation;
+                        },
+                        JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(7)),
+                        StreamJoined.with(Serdes.Long(), new JsonSerde<>(Operation.class), new JsonSerde<>(Operation.class)))
                 .peek((key, value) -> {
                     Operation operation = operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key));
                     operation.setIsConfirmed(true);
@@ -69,12 +72,18 @@ public class MyStreamsProcessing {
                 });
 
         KStream<Long, Operation> refundOperations = confirmedOperations
-                .filter((key, value) -> value != null && value.getOperationType() == OperType.REFUND)
+                .filter((key, value) -> value.getOperationType() == OperType.REFUND)
                 .selectKey((key, value) -> value.getAccountId())
-                .peek((key, value) -> {
-                    Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
-                    BigDecimal newBalance = account.getBalance().add(value.getAmount());
-                    setNewBalanceToAccount(account, newBalance);
+                .filter((key, value) -> {
+                    try {
+                        Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
+                        BigDecimal newBalance = account.getBalance().add(value.getAmount());
+                        setNewBalanceToAccount(account, newBalance);
+                        return true;
+                    } catch (Exception e) {
+                        kafkaTemplate.send("my-retry", value);
+                        return false;
+                    }
                 });
         refundOperations.to("dlg-succeed", Produced.with(Serdes.Long(), new JsonSerde<>(Operation.class)));
 
@@ -82,8 +91,8 @@ public class MyStreamsProcessing {
                 .filter((key, value) -> value.getOperationType() == OperType.WITHDRAWAL)
                 .selectKey((key, value) -> value.getId())
                 .mapValues((key, value) -> {
-                        Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
-                        return account.getBalance().subtract(value.getAmount());
+                    Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
+                    return account.getBalance().subtract(value.getAmount());
                 });
 
         KStream<Long, Operation> withdrawalOperationsSuccess = withdrawalOperations

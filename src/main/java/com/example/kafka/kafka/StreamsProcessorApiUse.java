@@ -1,21 +1,13 @@
 package com.example.kafka.kafka;
 
-import com.example.kafka.entity.Operation;
-import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
-import org.apache.kafka.common.serialization.Serdes;
 import com.example.kafka.repository.jpa.AccountRepo;
 import com.example.kafka.repository.jpa.OperationRepo;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.processor.api.Processor;
-import org.apache.kafka.streams.processor.api.ProcessorContext;
-import org.apache.kafka.streams.processor.api.ProcessorSupplier;
-import org.apache.kafka.streams.processor.api.Record;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
@@ -29,10 +21,9 @@ public class StreamsProcessorApiUse {
     private final AccountRepo accountRepo;
     private final OperationRepo operationRepo;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final JsonSerde<Operation> operationJsonSerde;
 
 //    @Autowired
-    @PostConstruct
+//    @PostConstruct
     public void process() {
 
         Topology topology = new Topology();
@@ -70,41 +61,3 @@ public class StreamsProcessorApiUse {
         return props;
     }
 }
-
-//@Component
-//@Slf4j
-//@AllArgsConstructor
-//public class StreamsProcessorApiUse implements ProcessorSupplier<Long, Operation, Long, Operation> {
-//
-//    private final OperationProcessor operationProcessor;
-//    private final ConfirmProcessor confirmProcessor;
-//
-//    @Override
-//    public Processor<Long, Operation, Long, Operation> get() {
-//        return new Processor<Long, Operation, Long, Operation>() {
-//            private ProcessorContext context;
-//
-//            @Override
-//            public void init(ProcessorContext context) {
-//                this.context = context;
-//            }
-//
-//            @Override
-//            public void process(Record<Long, Operation> record) {
-////                Long key = record.key();
-////                Operation operation = record.value();
-//
-//                // Process change-balance topic
-//                operationProcessor.process(record);
-//
-//                // Process payment-confirmation topic
-//                context.forward(record);
-//            }
-//
-//            @Override
-//            public void close() {
-//                // Cleanup logic (optional)
-//            }
-//        };
-//    }
-//}

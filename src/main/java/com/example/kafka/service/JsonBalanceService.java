@@ -25,9 +25,10 @@ public class JsonBalanceService {
 
     private final PersonRepo personRepo;
     private final AccountRepo accountRepo;
-    private  final OperationRepo operationRepo;
+    private final OperationRepo operationRepo;
     private final JsonChangeBalanceProducer changeBalanceProducer;
     private final ConfirmProducer confirmProducer;
+
 
     public Account saveNewAccount(Account account) {
         personRepo.findById(account.getPersonId()).orElseThrow(() -> new NoSuchPersonException(account.getPersonId()));
