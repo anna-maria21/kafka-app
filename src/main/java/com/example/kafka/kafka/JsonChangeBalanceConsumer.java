@@ -22,11 +22,12 @@ public class JsonChangeBalanceConsumer {
     private final AccountRepo accountRepo;
     private final ThrowErrorProducer throwErrorProducer;
     private final OperationRepo operationRepo;
+    private static final String CHANGE_BALANCE_TOPIC = "change-balance";
 
-//    @KafkaListener(topics = "change-balance", groupId = "myConsGroup")
+//    @KafkaListener(topics = CHANGE_BALANCE_TOPIC, groupId = "myConsGroup")
     public void consume(ConsumerRecord<Long, Operation> input) {
 
-        log.info("Topic: \"change-balance\". Consumed: {}", input);
+        log.info("Topic: {}. Consumed: {}",CHANGE_BALANCE_TOPIC, input);
 
         Account account = accountRepo.findById(input.key())
                 .orElseThrow(() -> new NoSuchAccountException(input.key()));

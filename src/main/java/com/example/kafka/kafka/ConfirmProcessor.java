@@ -14,10 +14,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ConfirmProcessor implements Processor<Long, Operation, Long, Operation> {
 
+    public static final String CONFIRMATION = "payment-confirmation";
+    private static final String HASH_KEY = "Operation";
+
     private ProcessorContext<Long, Operation> context;
     private final RedisTemplate<String, Object> redisTemplate;
     private final OperationRepo operationRepo;
-    private static final String HASH_KEY = "Operation";
 
     public ConfirmProcessor(OperationRepo operationRepo, RedisTemplate<String, Object> redisTemplate) {
         this.operationRepo = operationRepo;
@@ -31,7 +33,7 @@ public class ConfirmProcessor implements Processor<Long, Operation, Long, Operat
 
     @Override
     public void process(Record<Long, Operation> record) {
-        log.info("Consumed from topic \"payment-confirmation\": account - {}, operation - {}", record.key(), record.value());
+        log.info("Consumed from topic {}: account - {}, operation - {}", CONFIRMATION, record.key(), record.value());
         Operation redisOperation = (Operation) redisTemplate.opsForHash().get(HASH_KEY, record.value().getId().toString());
         if (redisOperation != null) {
             redisTemplate.opsForHash().delete(HASH_KEY, record.value().getId().toString());

@@ -2,22 +2,24 @@ package com.example.kafka.kafka;
 
 import com.example.kafka.entity.Operation;
 import com.example.kafka.repository.jpa.OperationRepo;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
+//@Component
 public class OperationProcessor implements Processor<Long, Operation, Long, Operation> {
+
+    private static final String HASH_KEY = "Operation";
+    private static final String CHANGE_BALANCE_TOPIC = "change-balance";
+
 
     private ProcessorContext<Long, Operation> context;
     private final OperationRepo operationRepo;
     private final RedisTemplate<String, Object> redisTemplate;
-    private static final String HASH_KEY = "Operation";
 
     public OperationProcessor(OperationRepo operationRepo, RedisTemplate<String, Object> redisTemplate) {
         this.operationRepo = operationRepo;
@@ -31,7 +33,7 @@ public class OperationProcessor implements Processor<Long, Operation, Long, Oper
 
     @Override
     public void process(Record<Long, Operation> record) {
-        log.info("Consumed from topic \"change-balance\": account - {}, operation - {}", record.key(), record.value());
+        log.info("Consumed from topic {}: account - {}, operation - {}", CHANGE_BALANCE_TOPIC, record.key(), record.value());
         operationRepo.save(record.value());
         redisTemplate.opsForHash().put(HASH_KEY, record.key().toString(), record.value());
         context.forward(record);
@@ -39,7 +41,5 @@ public class OperationProcessor implements Processor<Long, Operation, Long, Oper
     }
     @Override
     public void close() {}
-
-
 }
 

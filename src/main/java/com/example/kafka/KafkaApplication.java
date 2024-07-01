@@ -8,7 +8,7 @@ import org.springframework.kafka.annotation.EnableKafkaStreams;
 
 @SpringBootApplication
 @EnableKafka
-@EnableKafkaStreams
+//@EnableKafkaStreams
 @EnableCaching
 public class KafkaApplication {
 

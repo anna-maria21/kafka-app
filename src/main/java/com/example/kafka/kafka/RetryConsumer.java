@@ -22,8 +22,11 @@ public class RetryConsumer {
 
     private final Map<Operation, Integer> notProcessed = new ConcurrentHashMap<>();
     private final KafkaTemplate<Long, Operation> kafkaTemplate;
+    private static final String CHANGE_BALANCE_TOPIC = "change-balance";
+    private static final String RETRY_TOPIC = "my-retry";
+    private static final String DLQ_TOPIC = "dlq";
 
-    @KafkaListener(topics = "my-retry", groupId = "myConsGroup")
+    @KafkaListener(topics = RETRY_TOPIC, groupId = "myConsGroup")
 //    @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 5000))
     public void consume(ConsumerRecord<Long, Operation> record) {
         log.info("Topic: \"my-retry\"");
@@ -31,9 +34,9 @@ public class RetryConsumer {
         Operation operation = record.value();
         notProcessed.merge(operation, 1, Integer::sum);
         if (notProcessed.get(operation) < 3) {
-            kafkaTemplate.send("change-balance", operation.getAccountId(), operation);
+            kafkaTemplate.send(CHANGE_BALANCE_TOPIC, operation.getAccountId(), operation);
         } else {
-            kafkaTemplate.send("dlq", operation);
+            kafkaTemplate.send(DLQ_TOPIC, operation);
         }
     }
 }

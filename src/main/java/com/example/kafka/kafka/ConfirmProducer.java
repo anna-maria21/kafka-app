@@ -16,9 +16,10 @@ public class ConfirmProducer {
 
     private KafkaTemplate<Long, Operation> kafkaTemplate;
     private OperationRepo operationRepo;
+    public static final String CONFIRMATION = "payment-confirmation";
 
     public void send(LinkedList<Integer> operationIds) {
-        log.info("Sending message to the confirmation topic ...");
-        operationIds.forEach(id -> kafkaTemplate.send("payment-confirmation", Long.valueOf(id), operationRepo.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Operation not found"))));
+        log.info("Sending message to the {} topic ...", CONFIRMATION);
+        operationIds.forEach(id -> kafkaTemplate.send(CONFIRMATION, Long.valueOf(id), operationRepo.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Operation not found"))));
         }
 }

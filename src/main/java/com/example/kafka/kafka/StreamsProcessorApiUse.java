@@ -2,6 +2,7 @@ package com.example.kafka.kafka;
 
 import com.example.kafka.repository.jpa.AccountRepo;
 import com.example.kafka.repository.jpa.OperationRepo;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
@@ -21,15 +22,17 @@ public class StreamsProcessorApiUse {
     private final AccountRepo accountRepo;
     private final OperationRepo operationRepo;
     private final RedisTemplate<String, Object> redisTemplate;
+    private static final String CHANGE_BALANCE_TOPIC = "change-balance";
+    private static final String CONFIRMATION_TOPIC = "payment-confirmation";
 
 //    @Autowired
-//    @PostConstruct
+    @PostConstruct
     public void process() {
 
         Topology topology = new Topology();
 
-        topology.addSource("ChangeBalanceSource", "change-balance")
-                .addSource("PaymentConfirmationSource", "payment-confirmation");
+        topology.addSource("ChangeBalanceSource", CHANGE_BALANCE_TOPIC)
+                .addSource("PaymentConfirmationSource", CONFIRMATION_TOPIC);
 
         topology.addProcessor("OperationProcessor",
                 () -> new OperationProcessor(operationRepo, redisTemplate),
