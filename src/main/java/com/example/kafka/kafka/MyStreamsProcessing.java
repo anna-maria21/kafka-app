@@ -36,15 +36,20 @@ public class MyStreamsProcessing {
 
     @Autowired
     public void process(StreamsBuilder builder) {
-//        redisTemplate.getConnectionFactory().getConnection().flushAll();
 
         KStream<Long, Operation> operStream = builder
                 .stream("change-balance", Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
                 .mapValues(operationRepo::save)
-                .peek((key, value) -> {
-                    log.info("Consumed from topic \"change-balance\": account - {}, operation - {}", key, value);
-                    redisTemplate.opsForHash().put(HASH_KEY, key.toString(), value);
-                    redisTemplate.expire(String.valueOf(key), 7, TimeUnit.DAYS);
+                .filter((key, value) -> {
+                    try {
+                        log.info("Consumed from topic \"change-balance\": account - {}, operation - {}", key, value);
+                        redisTemplate.opsForHash().put(HASH_KEY, key.toString(), value);
+                        redisTemplate.expire(String.valueOf(key), 7, TimeUnit.DAYS);
+                        return true;
+                    } catch (Exception e) {
+                        kafkaTemplate.send("my-retry", value);
+                        return false;
+                    }
                 })
                 .selectKey((key, value) -> value.getId());
 
@@ -65,10 +70,16 @@ public class MyStreamsProcessing {
                         },
                         JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(7)),
                         StreamJoined.with(Serdes.Long(), new JsonSerde<>(Operation.class), new JsonSerde<>(Operation.class)))
-                .peek((key, value) -> {
-                    Operation operation = operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key));
-                    operation.setIsConfirmed(true);
-                    operationRepo.save(operation);
+                .filter((key, value) -> {
+                    try {
+                        Operation operation = operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key));
+                        operation.setIsConfirmed(true);
+                        operationRepo.save(operation);
+                        return true;
+                    } catch (Exception e) {
+                        kafkaTemplate.send("my-retry", value);
+                        return false;
+                    }
                 });
 
         KStream<Long, Operation> refundOperations = confirmedOperations
@@ -91,18 +102,30 @@ public class MyStreamsProcessing {
                 .filter((key, value) -> value.getOperationType() == OperType.WITHDRAWAL)
                 .selectKey((key, value) -> value.getId())
                 .mapValues((key, value) -> {
-                    Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
-                    return account.getBalance().subtract(value.getAmount());
-                });
+                    try {
+                        Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
+                        return account.getBalance().subtract(value.getAmount());
+                    } catch (Exception e) {
+                        kafkaTemplate.send("my-retry", value);
+                        return null;
+                    }
+                })
+                .filter((key, value) -> value != null);
 
         KStream<Long, Operation> withdrawalOperationsSuccess = withdrawalOperations
                 .filter((key, value) -> value.compareTo(BigDecimal.ZERO) > 0)
                 .mapValues((key, value) -> operationRepo.findById(key).orElseThrow(() -> new NoSuchOperationException(key)))
                 .selectKey((key, value) -> value.getAccountId())
-                .peek((key, value) -> {
-                    Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
-                    BigDecimal newBalance = account.getBalance().subtract(value.getAmount());
-                    setNewBalanceToAccount(account, newBalance);
+                .filter((key, value) -> {
+                    try {
+                        Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
+                        BigDecimal newBalance = account.getBalance().subtract(value.getAmount());
+                        setNewBalanceToAccount(account, newBalance);
+                        return true;
+                    } catch (Exception e) {
+                        kafkaTemplate.send("my-retry", value);
+                        return false;
+                    }
                 });
         withdrawalOperationsSuccess.to("dlg-succeed", Produced.with(Serdes.Long(), new JsonSerde<>(Operation.class)));
 
