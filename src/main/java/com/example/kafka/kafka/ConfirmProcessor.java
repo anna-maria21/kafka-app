@@ -2,11 +2,11 @@ package com.example.kafka.kafka;
 
 import com.example.kafka.entity.Operation;
 import com.example.kafka.repository.jpa.OperationRepo;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +14,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ConfirmProcessor implements Processor<Long, Operation, Long, Operation> {
 
-    public static final String CONFIRMATION = "payment-confirmation";
     private static final String HASH_KEY = "Operation";
+    public static final String CONFIRMATION = "payment-confirmation";
 
     private ProcessorContext<Long, Operation> context;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final OperationRepo operationRepo;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private KeyValueStore<Long, Operation> store;
 
     public ConfirmProcessor(OperationRepo operationRepo, RedisTemplate<String, Object> redisTemplate) {
         this.operationRepo = operationRepo;
@@ -29,18 +30,24 @@ public class ConfirmProcessor implements Processor<Long, Operation, Long, Operat
     @Override
     public void init(ProcessorContext<Long, Operation> context) {
         this.context = context;
+        store = context.getStateStore("confirmation-store");
     }
 
     @Override
     public void process(Record<Long, Operation> record) {
-        log.info("Consumed from topic {}: account - {}, operation - {}", CONFIRMATION, record.key(), record.value());
-        Operation redisOperation = (Operation) redisTemplate.opsForHash().get(HASH_KEY, record.value().getId().toString());
-        if (redisOperation != null) {
-            redisTemplate.opsForHash().delete(HASH_KEY, record.value().getId().toString());
-            redisOperation.setIsConfirmed(true);
-            operationRepo.save(redisOperation);
-            context.forward(record);
-        }
+
+        log.info("Consumed from topic {} Confirmed operation id: {}", CONFIRMATION, record.key());
+//        Operation redisOperation = (Operation) redisTemplate.opsForHash().get(HASH_KEY, record.key().toString());
+//        log.info("operation from redis {}", record.value());
+//
+//        if (redisOperation != null) {
+//            redisTemplate.opsForHash().delete(HASH_KEY, record.value().getId().toString());
+//            redisOperation.setIsConfirmed(true);
+//            Operation updatedOperation = operationRepo.save(redisOperation);
+//            context.forward(new Record<>(record.key(), updatedOperation, record.timestamp()));
+//        })
+        store.put(record.key(), record.value());
+        context.forward(record);
         context.commit();
     }
 

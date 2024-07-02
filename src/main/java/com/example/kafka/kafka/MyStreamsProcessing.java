@@ -28,11 +28,11 @@ import java.util.concurrent.TimeUnit;
 public class MyStreamsProcessing {
 
     public static final String HASH_KEY = "Operation";
-    public static final String DLG_SUCCEED = "dlg-succeed";
     public static final String CONFIRMATION = "payment-confirmation";
     public static final String CHANGE_BALANCE_TOPIC = "change-balance";
     public static final String RETRY_TOPIC = "my-retry";
     public static final String DLG_FAILED = "dlg-failed";
+    public static final String DLG_SUCCEED = "dlg-succeed";
 
     private final AccountRepo accountRepo;
     private final OperationRepo operationRepo;
