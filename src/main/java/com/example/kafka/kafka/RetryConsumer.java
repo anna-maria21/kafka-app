@@ -34,6 +34,7 @@ public class RetryConsumer {
         notProcessed.merge(operation, 1, Integer::sum);
         if (notProcessed.get(operation) < 3) {
             kafkaTemplate.send(CHANGE_BALANCE, operation.getAccountId(), operation);
+            kafkaTemplate.send(CONFIRMATION, operation.getId(), operation);
         } else {
             kafkaTemplate.send(DLQ, operation);
         }

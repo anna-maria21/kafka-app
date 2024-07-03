@@ -1,7 +1,6 @@
 package com.example.kafka.kafka;
 
 import com.example.kafka.entity.Operation;
-import com.example.kafka.repository.jpa.AccountRepo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,9 +13,6 @@ import static com.example.kafka.config.KafkaTopicConfig.DLG_SUCCEED;
 @AllArgsConstructor
 @Slf4j
 public class SuccessPaymentsConsumer {
-
-    private final AccountRepo accountRepo;
-
 
     @KafkaListener(topics = DLG_SUCCEED, groupId = "myConsGroup")
     public void consume(ConsumerRecord<Long, Operation> record) {

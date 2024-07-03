@@ -9,6 +9,8 @@ import org.apache.kafka.streams.processor.api.Record;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.example.kafka.config.KafkaTopicConfig.CHANGE_BALANCE;
 import static com.example.kafka.config.KafkaTopicConfig.RETRY;
 
@@ -40,8 +42,10 @@ public class OperationProcessor implements Processor<Long, Operation, Long, Oper
             record = new Record<>(record.key(), o, record.timestamp());
             log.info("Consumed from topic {}: account - {}, operation - {}",
                     CHANGE_BALANCE, record.key(), record.value());
+
             redisTemplate.opsForHash().put(HASH_KEY, record.value().getId().toString(), record.value());
-            context.forward(record);
+            redisTemplate.expire(record.value().getId().toString(), 7, TimeUnit.DAYS);
+//            context.forward(record);
             context.commit();
         } catch (Exception e) {
             kafkaTemplate.send(RETRY, record.value());
