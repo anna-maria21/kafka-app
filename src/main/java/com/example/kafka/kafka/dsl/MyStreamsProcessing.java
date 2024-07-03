@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.dsl;
 
 import com.example.kafka.dto.OperType;
 import com.example.kafka.entity.Account;
@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerde;

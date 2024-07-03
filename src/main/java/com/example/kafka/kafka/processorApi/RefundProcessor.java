@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.processorApi;
 
 import com.example.kafka.dto.OperType;
 import com.example.kafka.entity.Account;
@@ -16,7 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import java.math.BigDecimal;
 
 import static com.example.kafka.config.KafkaTopicConfig.RETRY;
-import static com.example.kafka.kafka.StreamsProcessorApiUse.setIsConfirmedForOperation;
+import static com.example.kafka.kafka.processorApi.JoinProcessor.setIsConfirmedForOperation;
 
 @Slf4j
 @AllArgsConstructor
@@ -54,10 +54,6 @@ public class RefundProcessor implements Processor<Long, Operation, Long, Operati
         } catch (Exception e) {
             kafkaTemplate.send(RETRY, record.value());
         }
-    }
-
-    @Override
-    public void close() {
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.processorApi;
 
 import com.example.kafka.entity.Operation;
 import lombok.NoArgsConstructor;
@@ -26,10 +26,6 @@ public class ConfirmProcessor implements Processor<Long, Operation, Long, Operat
         log.info("Consumed from topic {} Confirmed operation id: {}", CONFIRMATION, record.key());
         context.forward(record);
         context.commit();
-    }
-
-    @Override
-    public void close() {
     }
 }
 

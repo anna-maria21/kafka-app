@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.processorApi;
 
 import com.example.kafka.entity.Operation;
 import com.example.kafka.repository.jpa.OperationRepo;
@@ -50,10 +50,6 @@ public class OperationProcessor implements Processor<Long, Operation, Long, Oper
         } catch (Exception e) {
             kafkaTemplate.send(RETRY, record.value());
         }
-    }
-
-    @Override
-    public void close() {
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.simple;
 
 import com.example.kafka.dto.OperType;
 import com.example.kafka.entity.Account;

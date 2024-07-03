@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.simple;
 
 import com.example.kafka.entity.Operation;
 import com.example.kafka.repository.jpa.OperationRepo;

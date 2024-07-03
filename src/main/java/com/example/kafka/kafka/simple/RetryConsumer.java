@@ -1,4 +1,4 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.simple;
 
 import com.example.kafka.entity.Operation;
 import lombok.AllArgsConstructor;
@@ -27,12 +27,13 @@ public class RetryConsumer {
 
     @KafkaListener(topics = RETRY, groupId = "myConsGroup")
 //    @RetryableTopic(dltStrategy = DltStrategy.ALWAYS_RETRY_ON_ERROR)
-    public void consume(ConsumerRecord<Long, Operation> record) {
+    public void consume(ConsumerRecord<Long, Operation> record) throws InterruptedException {
         log.info("Topic: \"my-retry\"");
         log.error("Trying to process Operation: {}", record.value());
         Operation operation = record.value();
         notProcessed.merge(operation, 1, Integer::sum);
         if (notProcessed.get(operation) < 3) {
+            Thread.sleep(3000);
             kafkaTemplate.send(CHANGE_BALANCE, operation.getAccountId(), operation);
             kafkaTemplate.send(CONFIRMATION, operation.getId(), operation);
         } else {

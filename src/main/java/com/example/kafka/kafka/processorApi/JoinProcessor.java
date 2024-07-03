@@ -1,6 +1,8 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.processorApi;
 
 import com.example.kafka.entity.Operation;
+import com.example.kafka.exception.NoSuchOperationException;
+import com.example.kafka.repository.jpa.OperationRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
@@ -34,7 +36,10 @@ public class JoinProcessor implements Processor<Long, Operation, Long, Operation
         context.commit();
     }
 
-    @Override
-    public void close() {
+    static void setIsConfirmedForOperation(Record<Long, Operation> record, OperationRepo operationRepo) {
+        Operation o = operationRepo.findById(record.value().getId())
+                .orElseThrow(() -> new NoSuchOperationException(record.value().getId()));
+        o.setIsConfirmed(true);
+        operationRepo.save(o);
     }
 }

@@ -1,7 +1,6 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.processorApi;
 
 import com.example.kafka.entity.Operation;
-import com.example.kafka.exception.NoSuchOperationException;
 import com.example.kafka.repository.jpa.AccountRepo;
 import com.example.kafka.repository.jpa.OperationRepo;
 import jakarta.annotation.PostConstruct;
@@ -9,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.processor.api.Record;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -59,12 +57,12 @@ public class StreamsProcessorApiUse {
         System.out.println(topology.describe());
 
         KafkaStreams streams = new KafkaStreams(topology, kafkaStreamsConfiguration.asProperties());
-        streams.start();
+        try (KafkaStreams ignored = streams) {
+            streams.start();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
-    static void setIsConfirmedForOperation(Record<Long, Operation> record, OperationRepo operationRepo) {
-        Operation o = operationRepo.findById(record.value().getId())
-                .orElseThrow(() -> new NoSuchOperationException(record.value().getId()));
-        o.setIsConfirmed(true);
-        operationRepo.save(o);
-    }
+
 }
