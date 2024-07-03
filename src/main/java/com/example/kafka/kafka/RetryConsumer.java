@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.example.kafka.config.KafkaTopicConfig.*;
+
 @Service
 @AllArgsConstructor
 @Getter
@@ -22,21 +24,18 @@ public class RetryConsumer {
 
     private final Map<Operation, Integer> notProcessed = new ConcurrentHashMap<>();
     private final KafkaTemplate<Long, Operation> kafkaTemplate;
-    private static final String CHANGE_BALANCE_TOPIC = "change-balance";
-    private static final String RETRY_TOPIC = "my-retry";
-    private static final String DLQ_TOPIC = "dlq";
 
-    @KafkaListener(topics = RETRY_TOPIC, groupId = "myConsGroup")
-//    @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 5000))
+    @KafkaListener(topics = RETRY, groupId = "myConsGroup")
+//    @RetryableTopic(dltStrategy = DltStrategy.ALWAYS_RETRY_ON_ERROR)
     public void consume(ConsumerRecord<Long, Operation> record) {
         log.info("Topic: \"my-retry\"");
         log.error("Trying to process Operation: {}", record.value());
         Operation operation = record.value();
         notProcessed.merge(operation, 1, Integer::sum);
         if (notProcessed.get(operation) < 3) {
-            kafkaTemplate.send(CHANGE_BALANCE_TOPIC, operation.getAccountId(), operation);
+            kafkaTemplate.send(CHANGE_BALANCE, operation.getAccountId(), operation);
         } else {
-            kafkaTemplate.send(DLQ_TOPIC, operation);
+            kafkaTemplate.send(DLQ, operation);
         }
     }
 }

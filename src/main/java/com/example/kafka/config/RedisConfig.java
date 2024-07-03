@@ -12,6 +12,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableRedisRepositories(basePackages = "com.example.kafka.repository.redis")
 public class RedisConfig {
 
+
+    public static final String HASH_KEY = "Operation";
+
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         return new JedisConnectionFactory();

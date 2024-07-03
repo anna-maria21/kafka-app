@@ -13,11 +13,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.math.BigDecimal;
 
+import static com.example.kafka.config.KafkaTopicConfig.DLG_FAILED;
+import static com.example.kafka.config.KafkaTopicConfig.DLG_SUCCEED;
+
 @AllArgsConstructor
 public class WithdrawalProcessor implements Processor<Long, Operation, Long, Operation> {
-
-    public static final String DLG_FAILED = "dlg-failed";
-    public static final String DLG_SUCCEED = "dlg-succeed";
 
     private ProcessorContext<Long, Operation> context;
     private final AccountRepo accountRepo;
@@ -51,6 +51,7 @@ public class WithdrawalProcessor implements Processor<Long, Operation, Long, Ope
     }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 }
 

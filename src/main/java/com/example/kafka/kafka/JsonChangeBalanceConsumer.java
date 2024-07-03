@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+import static com.example.kafka.config.KafkaTopicConfig.CHANGE_BALANCE;
+
 
 @Service
 @Slf4j
@@ -22,12 +24,11 @@ public class JsonChangeBalanceConsumer {
     private final AccountRepo accountRepo;
     private final ThrowErrorProducer throwErrorProducer;
     private final OperationRepo operationRepo;
-    private static final String CHANGE_BALANCE_TOPIC = "change-balance";
 
 //    @KafkaListener(topics = CHANGE_BALANCE_TOPIC, groupId = "myConsGroup")
     public void consume(ConsumerRecord<Long, Operation> input) {
 
-        log.info("Topic: {}. Consumed: {}",CHANGE_BALANCE_TOPIC, input);
+        log.info("Topic: {}. Consumed: {}",CHANGE_BALANCE, input);
 
         Account account = accountRepo.findById(input.key())
                 .orElseThrow(() -> new NoSuchAccountException(input.key()));

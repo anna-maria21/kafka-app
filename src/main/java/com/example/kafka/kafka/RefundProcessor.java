@@ -43,6 +43,7 @@ public class RefundProcessor implements Processor<Long, Operation, Long, Operati
     }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 }
 

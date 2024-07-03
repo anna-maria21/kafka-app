@@ -22,37 +22,33 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.kafka.config.KafkaTopicConfig.*;
+import static com.example.kafka.config.RedisConfig.HASH_KEY;
+
 @Component
 @Slf4j
 @AllArgsConstructor
 public class MyStreamsProcessing {
 
-    public static final String HASH_KEY = "Operation";
-    public static final String CONFIRMATION = "payment-confirmation";
-    public static final String CHANGE_BALANCE_TOPIC = "change-balance";
-    public static final String RETRY_TOPIC = "my-retry";
-    public static final String DLG_FAILED = "dlg-failed";
-    public static final String DLG_SUCCEED = "dlg-succeed";
-
     private final AccountRepo accountRepo;
     private final OperationRepo operationRepo;
     private final RedisTemplate<String, Object> redisTemplate;
     private KafkaTemplate<Long, Operation> kafkaTemplate;
-
+    
 //    @Autowired
     public void process(StreamsBuilder builder) {
 
         KStream<Long, Operation> operStream = builder
-                .stream(CHANGE_BALANCE_TOPIC, Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
+                .stream(CHANGE_BALANCE, Consumed.with(Serdes.Long(), new JsonSerde<>(Operation.class)))
                 .mapValues(operationRepo::save)
                 .filter((key, value) -> {
                     try {
-                        log.info("Consumed from topic {}: account - {}, operation - {}",CHANGE_BALANCE_TOPIC, key, value);
+                        log.info("Consumed from topic {}: account - {}, operation - {}", CHANGE_BALANCE, key, value);
                         redisTemplate.opsForHash().put(HASH_KEY, key.toString(), value);
                         redisTemplate.expire(String.valueOf(key), 7, TimeUnit.DAYS);
                         return true;
                     } catch (Exception e) {
-                        kafkaTemplate.send(RETRY_TOPIC, value);
+                        kafkaTemplate.send(RETRY, value);
                         return false;
                     }
                 })
@@ -82,7 +78,7 @@ public class MyStreamsProcessing {
                         operationRepo.save(operation);
                         return true;
                     } catch (Exception e) {
-                        kafkaTemplate.send(RETRY_TOPIC, value);
+                        kafkaTemplate.send(RETRY, value);
                         return false;
                     }
                 });
@@ -97,7 +93,7 @@ public class MyStreamsProcessing {
                         setNewBalanceToAccount(account, newBalance);
                         return true;
                     } catch (Exception e) {
-                        kafkaTemplate.send(RETRY_TOPIC, value);
+                        kafkaTemplate.send(RETRY, value);
                         return false;
                     }
                 });
@@ -111,7 +107,7 @@ public class MyStreamsProcessing {
                         Account account = accountRepo.findById(value.getAccountId()).orElseThrow(() -> new NoSuchAccountException(value.getAccountId()));
                         return account.getBalance().subtract(value.getAmount());
                     } catch (Exception e) {
-                        kafkaTemplate.send(RETRY_TOPIC, value);
+                        kafkaTemplate.send(RETRY, value);
                         return null;
                     }
                 })
@@ -128,7 +124,7 @@ public class MyStreamsProcessing {
                         setNewBalanceToAccount(account, newBalance);
                         return true;
                     } catch (Exception e) {
-                        kafkaTemplate.send(RETRY_TOPIC, value);
+                        kafkaTemplate.send(RETRY, value);
                         return false;
                     }
                 });

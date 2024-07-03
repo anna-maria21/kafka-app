@@ -7,35 +7,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
-import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import static com.example.kafka.config.RedisConfig.HASH_KEY;
 
 @Slf4j
 public class JoinProcessor implements Processor<Long, Operation, Long, Operation> {
+
     private ProcessorContext<Long, Operation> context;
-
-    private KeyValueStore<Long, Operation> changeBalanceStore;
-    private KeyValueStore<Long, Operation> confirmationStore;
-
     private final OperationRepo operationRepo;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public JoinProcessor(OperationRepo operationRepo) {
+    public JoinProcessor(OperationRepo operationRepo, RedisTemplate<String, Object> redisTemplate) {
         this.operationRepo = operationRepo;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
     public void init(ProcessorContext<Long, Operation> context) {
         this.context = context;
-        changeBalanceStore = context.getStateStore("change-balance-store");
-        confirmationStore = context.getStateStore("confirmation-store");
     }
 
     @Override
     public void process(Record<Long, Operation> confirmedRecord) {
-        log.info("joining...");
-        Operation operation = changeBalanceStore.get(confirmedRecord.key());
-        log.info("from state store {}", operation);
+        Operation operation = (Operation) redisTemplate.opsForHash().get(HASH_KEY, confirmedRecord.key().toString());
         if (operation != null) {
+            redisTemplate.opsForHash().delete(HASH_KEY, confirmedRecord.key().toString());
             Operation o = operationRepo.findById(confirmedRecord.key())
                     .orElseThrow(() -> new NoSuchOperationException(confirmedRecord.key()));
             o.setIsConfirmed(true);
@@ -47,6 +44,5 @@ public class JoinProcessor implements Processor<Long, Operation, Long, Operation
 
     @Override
     public void close() {
-        Processor.super.close();
     }
 }

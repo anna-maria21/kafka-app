@@ -6,8 +6,10 @@ import com.example.kafka.entity.Person;
 import com.example.kafka.service.JsonBalanceService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedList;
 
@@ -17,15 +19,6 @@ import java.util.LinkedList;
 public class JsonBalanceController {
 
     private final JsonBalanceService service;
-    private final KafkaTemplate<Long, Operation> kafkaTemplate;
-
-
-    @PostMapping("retry")
-    public ResponseEntity<String> retry(@RequestBody Operation operation) {
-        kafkaTemplate.send("dlg-failed", operation.getAccountId(), operation);
-        return ResponseEntity.ok("JSON sent to the retry topic");
-    }
-
 
     @PostMapping("new/acc")
     public Account newAccount(@RequestBody Account account) {

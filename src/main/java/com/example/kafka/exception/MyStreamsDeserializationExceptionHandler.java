@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static com.example.kafka.config.KafkaTopicConfig.RETRY;
+
 //@AllArgsConstructor
 @Component
 @Slf4j
@@ -23,7 +25,7 @@ public class MyStreamsDeserializationExceptionHandler implements Deserialization
     @Override
     public DeserializationHandlerResponse handle(ProcessorContext context, ConsumerRecord<byte[], byte[]> record, Exception exception) {
         log.error("Error while processing record: ", exception);
-        kafkaTemplate.send("my-retry", record.value());
+        kafkaTemplate.send(RETRY, record.value());
         return DeserializationHandlerResponse.CONTINUE;
     }
 
