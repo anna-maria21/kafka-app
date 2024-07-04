@@ -3,7 +3,7 @@ package com.example.kafka.controller;
 import com.example.kafka.entity.Account;
 import com.example.kafka.entity.Operation;
 import com.example.kafka.entity.Person;
-import com.example.kafka.service.JsonBalanceService;
+import com.example.kafka.service.PaymentsService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +16,9 @@ import java.util.LinkedList;
 @RestController
 @RequestMapping("api/kafka/")
 @AllArgsConstructor
-public class JsonBalanceController {
+public class PaymentsController {
 
-    private final JsonBalanceService service;
+    private final PaymentsService service;
 
     @PostMapping("new/acc")
     public Account newAccount(@RequestBody Account account) {

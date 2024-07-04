@@ -21,7 +21,7 @@ import java.util.LinkedList;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class JsonBalanceService {
+public class PaymentsService {
 
     private final PersonRepo personRepo;
     private final AccountRepo accountRepo;

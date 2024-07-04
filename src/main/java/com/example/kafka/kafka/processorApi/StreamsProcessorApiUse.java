@@ -42,7 +42,7 @@ public class StreamsProcessorApiUse {
                 ConfirmProcessor::new,
                 "PaymentConfirmationSource");
         topology.addProcessor("JoinProcessor",
-                () -> new JoinProcessor(redisTemplate),
+                () -> new JoinProcessor(redisTemplate, kafkaTemplate),
                 "ConfirmProcessor");
         topology.addProcessor("RefundProcessor",
                 () -> new RefundProcessor(operationRepo, accountRepo, kafkaTemplate),
@@ -57,12 +57,7 @@ public class StreamsProcessorApiUse {
         System.out.println(topology.describe());
 
         KafkaStreams streams = new KafkaStreams(topology, kafkaStreamsConfiguration.asProperties());
-        try (KafkaStreams ignored = streams) {
-            streams.start();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+        streams.start();
     }
 
 }
