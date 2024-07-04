@@ -32,23 +32,24 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class PaymentsServiceTests {
 
-    public static final Long PERSON_ID = 1L;
-    public static final Long ACCOUNT_ID = 1L;
+    private static final Long PERSON_ID = 1L;
+    private static final Long ACCOUNT_ID = 1L;
     private static final Long OPERATION_ID = 1L;
+    private static final String TEST_TOPIC = "test-topic";
 
     @Mock
-    AccountRepo accountRepo;
+    private AccountRepo accountRepo;
     @Mock
-    PersonRepo personRepo;
+    private PersonRepo personRepo;
     @Mock
-    OperationRepo operationRepo;
+    private OperationRepo operationRepo;
     @Mock
-    JsonChangeBalanceProducer changeBalanceProducer;
+    private JsonChangeBalanceProducer changeBalanceProducer;
     @Mock
-    ConfirmProducer confirmProducer;
+    private ConfirmProducer confirmProducer;
 
     @InjectMocks
-    PaymentsService paymentsService;
+    private PaymentsService paymentsService;
 
 
     @Test
@@ -89,8 +90,8 @@ public class PaymentsServiceTests {
         operations.add(operation);
         when(accountRepo.findById(ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
 
-        paymentsService.sendPayments(operations);
-        verify(changeBalanceProducer).send(operations);
+        paymentsService.sendPayments(operations, TEST_TOPIC);
+        verify(changeBalanceProducer).send(operations, TEST_TOPIC);
     }
 
     @Test
@@ -100,7 +101,7 @@ public class PaymentsServiceTests {
         operations.add(operation);
         when(accountRepo.findById(ACCOUNT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchAccountException.class, () -> paymentsService.sendPayments(operations));
+        assertThrows(NoSuchAccountException.class, () -> paymentsService.sendPayments(operations, TEST_TOPIC));
     }
 
     @Test
@@ -110,8 +111,8 @@ public class PaymentsServiceTests {
         operations.add(Math.toIntExact(OPERATION_ID));
         when(operationRepo.findById(OPERATION_ID)).thenReturn(Optional.of(testOperation));
 
-        paymentsService.sendConfirmation(operations);
-        verify(confirmProducer).send(operations);
+        paymentsService.sendConfirmation(operations, TEST_TOPIC);
+        verify(confirmProducer).send(operations, TEST_TOPIC);
     }
 
     @Test
@@ -121,7 +122,7 @@ public class PaymentsServiceTests {
         operations.add(Math.toIntExact(OPERATION_ID));
         when(operationRepo.findById(OPERATION_ID)).thenReturn(Optional.of(testOperation));
 
-        assertThrows(AlreadyConfirmedOperationException.class, () -> paymentsService.sendConfirmation(operations));
+        assertThrows(AlreadyConfirmedOperationException.class, () -> paymentsService.sendConfirmation(operations, TEST_TOPIC));
     }
 
     @Test
@@ -130,7 +131,7 @@ public class PaymentsServiceTests {
         operations.add(Math.toIntExact(OPERATION_ID));
         when(operationRepo.findById(OPERATION_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchOperationException.class, () -> paymentsService.sendConfirmation(operations));
+        assertThrows(NoSuchOperationException.class, () -> paymentsService.sendConfirmation(operations, TEST_TOPIC));
     }
 
 

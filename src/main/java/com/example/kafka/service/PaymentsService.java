@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 
+import static com.example.kafka.config.KafkaTopicConfig.CHANGE_BALANCE;
+import static com.example.kafka.config.KafkaTopicConfig.CONFIRMATION;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -39,18 +42,18 @@ public class PaymentsService {
         return personRepo.save(person);
     }
 
-    public void sendPayments(LinkedList<Operation> operations) {
+    public void sendPayments(LinkedList<Operation> operations, String topic) {
         operations.forEach(o -> accountRepo.findById(o.getAccountId()).orElseThrow(() -> new NoSuchAccountException(o.getAccountId())));
-        changeBalanceProducer.send(operations);
+        changeBalanceProducer.send(operations, topic);
     }
 
-    public void sendConfirmation(LinkedList<Integer> ids) {
+    public void sendConfirmation(LinkedList<Integer> ids, String topic) {
         long amountAlreadyConfirmedOperations = ids.stream()
                 .filter(id -> operationRepo.findById(Long.valueOf(id)).orElseThrow(() -> new NoSuchOperationException(Long.valueOf(id))).getIsConfirmed())
                 .count();
         if (amountAlreadyConfirmedOperations > 0) {
             throw new AlreadyConfirmedOperationException();
         }
-        confirmProducer.send(ids);
+        confirmProducer.send(ids, topic);
     }
 }

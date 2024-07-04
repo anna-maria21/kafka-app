@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedList;
 
+import static com.example.kafka.config.KafkaTopicConfig.CHANGE_BALANCE;
+import static com.example.kafka.config.KafkaTopicConfig.CONFIRMATION;
+
 @RestController
 @RequestMapping("api/kafka/")
 @AllArgsConstructor
@@ -32,13 +35,13 @@ public class PaymentsController {
 
     @PostMapping("change-balance")
     public ResponseEntity<String> sendMessage(@RequestBody LinkedList<Operation> input) {
-        service.sendPayments(input);
+        service.sendPayments(input, CHANGE_BALANCE);
         return ResponseEntity.ok("JSON input sent to the topic");
     }
 
     @PostMapping("confirm")
     public ResponseEntity<String> confirmPayment(@RequestBody LinkedList<Integer> ids) {
-        service.sendConfirmation(ids);
+        service.sendConfirmation(ids, CONFIRMATION);
         return ResponseEntity.ok("Confirmation sent to the topic");
     }
 
