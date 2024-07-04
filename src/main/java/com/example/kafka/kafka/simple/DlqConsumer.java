@@ -16,6 +16,5 @@ public class DlqConsumer {
     public void consume(ConsumerRecord<Long, Operation> record) {
         log.info("Topic: \"dlq\"");
         log.error("Couldn't process Operation: {}", record.value());
-
     }
 }
