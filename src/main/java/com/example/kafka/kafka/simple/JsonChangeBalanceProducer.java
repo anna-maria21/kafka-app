@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.example.kafka.config.KafkaTopicConfig.CHANGE_BALANCE;
 
 @Service
 @Slf4j
@@ -17,9 +16,9 @@ public class JsonChangeBalanceProducer {
 
     private KafkaTemplate<Long, Operation> kafkaTemplate;
 
-    public void send(List<Operation> operations) {
+    public void send(List<Operation> operations, String topic) {
         log.info("Sending message to change balance to the topic ...");
-        operations.forEach(operation -> kafkaTemplate.send(CHANGE_BALANCE, operation.getAccountId(), operation));
+        operations.forEach(operation -> kafkaTemplate.send(topic, operation.getAccountId(), operation));
     }
 
 }
