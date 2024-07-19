@@ -18,11 +18,4 @@ public class Account {
     private Long id;
     private BigDecimal balance;
     private Long personId;
-
-//    @ManyToOne
-//    @JoinColumn(name = "personId")
-//    private Person person;
-//
-//    @OneToMany(mappedBy = "id", fetch = FetchType.EAGER)
-//    private Set<Operation> operations;
 }

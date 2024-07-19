@@ -1,5 +1,6 @@
-package com.example.kafka.kafka;
+package com.example.kafka.kafka.simple;
 
+import com.example.kafka.entity.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ThrowErrorProducer {
 
-    private KafkaTemplate<Long, String> kafkaTemplate;
+    private KafkaTemplate<Long, Operation> kafkaTemplate;
 
-    public void send(Long accId, String message) {
+    public void send(Long accId, Operation operation, String topic) {
         log.info("Sending message to the error topic ...");
-        kafkaTemplate.send("dlg-failed", accId, message);
+        kafkaTemplate.send(topic, accId, operation);
     }
 }

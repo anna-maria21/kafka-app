@@ -1,4 +1,4 @@
-package com.example.kafka.repository;
+package com.example.kafka.repository.jpa;
 
 import com.example.kafka.entity.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
